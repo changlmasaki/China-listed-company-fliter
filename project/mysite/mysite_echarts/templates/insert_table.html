@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.0/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+    <title>ECharts</title>
+    <!-- 引入刚刚下载的 ECharts 文件 -->
+    <script src="{% static 'js/echarts.js' %}"></script>
+
+  </head>
+  <body>
+    <!-- 为 ECharts 准备一个定义了宽高的 DOM -->
+    "<div id="container">
+    <div id="main" style="width: 50%; float: right; height:800px;">
+      <script type="text/javascript">
+      // 基于准备好的dom，初始化echarts实例
+      var y_data = {{ y_data|safe }};
+      var myChart = echarts.init(document.getElementById('main'));
+
+      // 指定图表的配置项和数据
+      var option = {
+  title: {
+    text: '上市公司全国各省分布',
+    left: 'center'
+  },
+  tooltip: {
+    trigger: 'item'
+  },
+  legend: {
+    orient: 'vertical',
+    left: 'left'
+  },
+  series: [
+    {
+      name: 'Access From',
+      type: 'pie',
+      radius: '50%',
+      data: y_data,
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
+    }
+  ]
+};
+
+      // 使用刚指定的配置项和数据显示图表。
+      myChart.setOption(option);
+    </script>
+    </div>
+    <div id="main2" style="width: 50%; float: left; height:800px;">
+      <script src="{% static 'js/china.js' %}"></script>
+
+    <script>
+        // 初始化echarts实例
+        var myEcharts = echarts.init(document.getElementById("main2"));
+        var y_data = {{ y_data|safe }};
+        var option = {
+            title: {  //标题样式
+                text: '中国地图',
+                x: "center",
+                textStyle: {
+                    fontSize: 18,
+                    color: "black"
+                },
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: function (params) {
+                    console.log(params)
+                    if (params.name) {
+                        return params.name + ' : ' + (isNaN(params.value) ? 0 : parseInt(params.value));
+                    }
+                }
+            },
+            visualMap: {//视觉映射组件
+                top: 'bottom',
+                left: 'left',
+                min: 10,
+                max: 200,
+                //text: ['High', 'Low'],
+                realtime: false,  //拖拽时，是否实时更新
+                calculable: true,  //是否显示拖拽用的手柄
+                inRange: {
+                    color: ['lightskyblue', 'yellow', 'orangered']
+                }
+            },
+            series: [
+                {
+                    name: '模拟数据',
+                    type: 'map',
+                    mapType: 'china',
+                    roam: false,//是否开启鼠标缩放和平移漫游
+                    itemStyle: {//地图区域的多边形 图形样式
+                        normal: {//是图形在默认状态下的样式
+                            label: {
+                                show: true,//是否显示标签
+                                textStyle: {
+                                    color: "black"
+                                }
+                            }
+                        },
+                        zoom: 1.5,  //地图缩放比例,默认为1
+                        emphasis: {//是图形在高亮状态下的样式,比如在鼠标悬浮或者图例联动高亮时
+                            label: {show: true}
+                        }
+                    },
+                    top: "3%",//组件距离容器的距离
+                    data: y_data
+
+                }
+            ]
+        };
+        // 使用刚指定的配置项和数据显示图表。
+        myEcharts.setOption(option);
+    </script>
+    </div>
+    </div>
+    <div id="main3" style="width: auto;height:800px;">
+      <table id="table_id" class="display">
+        <thead>
+          <tr>
+            <th>股票代码</th>
+            <th>股票简称</th>
+            <th>公司名称</th>
+            <th>省份</th>
+            <th>城市</th>
+            <th>主营业务收入</th>
+            <th>净利润</th>
+            <th>员工人数</th>
+            <th>上市日期</th>
+            <th>行业分类</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for x in table %}
+          <tr>
+            <td>{{ x.code }}</td>
+            <td><a href="https://finance.sina.com.cn/realstock/company/sz{{ x.code }}/nc.shtml">{{ x.abbr }}</a></td>
+            <td>{{ x.name }}</td>
+            <td>{{ x.province }}</td>
+            <td>{{ x.city }}</td>
+            <td>{{ x.main_income }}</td>
+            <td>{{ x.benefits }}</td>
+            <td>{{ x.staffs }}</td>
+            <td>{{ x.date }}</td>
+            <td>{{ x.job_category }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.0/js/jquery.dataTables.js"></script>
+  <script type="text/javascript"  src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+
+  <script>
+   $(document).ready( function () {
+    $('#table_id').DataTable({
+    "columnDefs": [
+{ "orderable": false, "targets": 5 },
+{ "orderable": false, "targets": 6 }
+]
+  });
+    } );
+
+  </script>
+
+
+  </body>
+</html>
